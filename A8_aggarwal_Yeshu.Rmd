@@ -1,0 +1,86 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+### GitHub Username: yeshuaggarwal
+### Student Name: Yeshu Aggarwal
+### Student ID: 20103933
+
+## Project Info
+
+**GitHub Link:** https://github.com/yeshuaggarwal/A8_Aggarwal_Yeshu.git
+
+
+# Background
+
+The following data looks at the microbiomes of plants, which is the communities of bacteria associated with samples of plants. In this report we are going to analyze how the communities of plants differ across sample locations. The data below come from a former MSc student testing whether the presence of an invasive plant called garlic mustard (Alliaria petiolata) changes the plant community.
+
+We are going to address two important biological questions:
+1. What effect (if any) does garlic mustard have on the plant community?
+2. What has a stronger effect on plant communities: the presence/absence of garlic mustard (in/out) or sampling population?
+
+### Load Libraries and Data
+```{r}
+library(dplyr)
+library(ape)
+library(ggplot2)
+library(ggtree)
+library(vegan)
+```
+
+```{r}
+Data<-read.csv("C:/Users/yeshu/Desktop/A8_Aggarwal_Yeshu/FloristicSurvey.csv")
+str(Data)
+```
+
+```{r}
+NData<- Data %>%
+  select(Rosettes:maianthenum_racemosum)
+NData
+```
+
+
+```{r}
+Data_dist<- vegdist(NData,method="bray",binary=F)
+Data_tree<-nj(Data_dist)
+ggtree(Data_tree,layout="rectangular") %<+% Data + 
+  geom_tiplab(aes(colour=Location)) +
+  theme(legend.position="right")
+```
+
+```{r}
+set.seed(13)
+NMDSdat<-metaMDS(Data_dist,k=2,trymax = 100)
+```
+
+```{r}
+PDat<-data.frame(NMDS1=NMDSdat$points[,1],
+                 NMDS2=NMDSdat$points[,2],
+                 Species=row.names(NData))
+PDat
+```
+
+
+```{r}
+qplot(x=NMDS1,y=NMDS2,colour=Species, alpha=I(0.6),data=PDat)+theme_bw()
+```
+
+###Explanation
+
+First of all, to understand the effect of garlic mustard on the plant community Bray-Curtis dissimilarity analysis was performed. This analysis is useful in seeing the effects of garlic mustard as the phylogeny can tell us the abundance of garlic mustard compared to other species in the plant community. It tell us if garlic mustard is becoming dominant in the community through competition via natural selection. 
+
+Secondly, to understand which has a stronger effect on plant communities, the presence or absence of garlic mustard or sampling population, a NMDS graph from the Bray-Curtis distance matrix was created. NMDS help us to look multiple species aross samples and to visualize if there is a strong relationship between species. NMDS graph with points closer together tells us that if the presence or absence of the garlic mustard is more similar to the other plant species in the community.
+
+
+
+
+
+
+
+
+
+
+
+
+
